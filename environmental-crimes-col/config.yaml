@@ -1,0 +1,72 @@
+# Configuration for a Basic ETL Pipeline
+pipeline:
+  name: Environmental Crime Data Pipeline
+  version: 1.0
+
+# PostgreSQL configuration 
+postgresql:
+  host: localhost
+  port: 5432
+  username: DB_USER
+  password: DB_PASSWORD
+  database_name: DB_NAME
+
+# Data source for environmental crimes (JSON URL)
+data_source:
+  environmental_crime_url: https://www.datos.gov.co/resource/9zck-qfvc.json
+
+# Environmental Crime Data columns
+crime_columns_list: 
+  - fecha_hecho
+  - cod_depto
+  - departamento
+  - cod_muni
+  - municipio
+  - descripcion_conducta
+  - zona
+  - cantidad
+
+# Environmental Crime Data column renames (to be applied in the transform phase)
+crime_columns_rename_dict:
+  fecha_hecho: FECHA_HECHO
+  cod_depto: COD_DEPTO
+  departamento: DEPARTAMENTO
+  cod_muni: COD_MUNICIPIO
+  municipio: MUNICIPIO
+  descripcion_conducta: DELITO
+  zona: ZONA
+  cantidad: CANTIDAD_DELITOS
+
+# Environmental Crime output table in PostgreSQL
+crime_table_PSQL: environmental_projects.environmental_crime
+
+# SQL schemas for PostgreSQL table creation
+crime_create_PSQL: |
+  CREATE TABLE IF NOT EXISTS environmental_projects.environmental_crime (
+    FECHA_HECHO DATE,
+    COD_DEPTO INTEGER,
+    DEPARTAMENTO VARCHAR(255),
+    COD_MUNICIPIO INTEGER,
+    MUNICIPIO VARCHAR(255),
+    DELITO VARCHAR(500),
+    ZONA VARCHAR(100),
+    CANTIDAD_DELITOS INTEGER
+  );
+
+# SQL insert statement for Environmental Crime data
+crime_insert_PSQL: 'INSERT INTO environmental_projects.environmental_crime (FECHA_HECHO, COD_DEPTO, DEPARTAMENTO, COD_MUNICIPIO, MUNICIPIO, DELITO, ZONA, CANTIDAD_DELITOS) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+
+# Paths for local data storage 
+local_storage:
+  extracted_data_path: data/extracted_environmental_crimes.json
+  transformed_data_path: data/transformed_environmental_crimes.csv
+
+# Logging and error handling configuration
+logging:
+  level: INFO
+  log_file: logs/environmental_crime_pipeline.log
+
+# Runtime configuration
+runtime:
+  batch_size: 1000
+  max_retries: 3

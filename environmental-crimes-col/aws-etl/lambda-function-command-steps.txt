@@ -1,0 +1,54 @@
+
+1. Create the Lambda Function
+aws lambda create-function \
+    --function-name S3FileProcessingFunction \
+    --zip-file fileb://lambda_function_package.zip \
+    --handler lambda_handler.lambda_handler \
+    --runtime python3.10 \
+    --role arn:aws:iam::<YOUR_ACCOUNT_ID>:role/<YOUR_ROLE_NAME>
+
+------------------------------------------------------------------------------------------------------------
+2. Grant Permissions for S3 Invocation
+aws lambda add-permission \
+    --function-name S3FileProcessingFunction \
+    --principal s3.amazonaws.com \
+    --statement-id S3InvokeLambdaPermission \
+    --action "lambda:InvokeFunction" \
+    --source-arn arn:aws:s3:::<YOUR_BUCKET_NAME> \
+    --source-account <YOUR_ACCOUNT_ID>
+
+------------------------------------------------------------------------------------------------------------
+3. Set Up S3 Trigger for Lambda Function
+aws s3api put-bucket-notification-configuration \
+    --bucket <YOUR_BUCKET_NAME> \
+    --notification-configuration '{
+      "LambdaFunctionConfigurations": [
+        {
+          "LambdaFunctionArn": "arn:aws:lambda:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:function:S3FileProcessingFunction",
+          "Events": ["s3:ObjectCreated:*"]
+        }
+      ]
+    }'
+
+------------------------------------------------------------------------------------------------------------
+4. {
+  "Comment": "Example Step Function that orchestrates Lambda functions.",
+  "StartAt": "EstablishS3Client",
+  "States": {
+    "EstablishS3Client": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:function:S3FileProcessingFunction",
+      "Next": "DefineFilePaths"
+    },
+    "DefineFilePaths": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:function:S3FileProcessingFunction",
+      "Next": "GetObjects"
+    },
+    "GetObjects": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:<YOUR_REGION>:<YOUR_ACCOUNT_ID>:function:S3FileProcessingFunction",
+      "End": true
+    }
+  }
+}
