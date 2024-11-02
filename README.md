@@ -25,3 +25,24 @@ The data used in this ETL pipeline comes from the [Environmental Crimes Dataset]
 
 ## 6. AWS Lambda Integration
 The ```aws-etl``` directory contains code to deploy the ETL pipeline on AWS Lambda, enabling automatic data updates in the cloud.
+
+# Setup and Execution
+**1. Clone the repository:**
+```
+git clone git@github.com:LiliValGo/ETL-Pipeline-Environmental-Crimes.git
+cd environmental-crimes-col
+```
+**2. Install dependencies:**
+
+```pip install -r requirements.txt```
+
+**3. Configure Database and S3 Access: Edit the config.ini file with your PostgreSQL and AWS credentials.**
+   
+**4. Run the ETL Pipeline:**
+```
+python etl-logging/logs.py
+```
+**5. Run Unit Tests:**
+   
+```python -m unittest discover -s tests```
+
